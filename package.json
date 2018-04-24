@@ -1,0 +1,132 @@
+{
+  "name": "aws-lex-proxy",
+  "version": "0.0.0-development",
+  "description": "Proxy to connect external services to AWS Lex",
+  "main": "dist/index.js",
+  "config": {
+    "s3BucketName": "lexproxy",
+    "region": "eu-west-1",
+    "cloudFormationStackName": "Lex-Proxy",
+    "functionName": "LexProxy",
+    "lambdaZipFile": "lex-proxy.zip",
+    "profile": "cris",
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "scripts": {
+    "update-lambda": "npm run build && zip -r $npm_package_config_lambdaZipFile node_modules/ dist/ && aws lambda update-function-code --function-name $npm_package_config_functionName --zip-file fileb://$npm_package_config_lambdaZipFile --region $npm_package_config_region --profile $npm_package_config_profile",
+    "package": "aws s3 sync . s3://$npm_package_config_s3BucketName/ --exclude '*' --include 'swagger-api-gateway-*.yaml' --profile $npm_package_config_profile && aws cloudformation package --template ./cloudformation.yaml --s3-bucket $npm_package_config_s3BucketName --output-template packaged-sam.yaml --region $npm_package_config_region --profile $npm_package_config_profile",
+    "create-bucket": "aws s3 mb s3://$npm_package_config_s3BucketName --region $npm_package_config_region --profile $npm_package_config_profile",
+    "deploy": "aws cloudformation deploy --parameter-overrides StackBucketName=$npm_package_config_s3BucketName --template-file packaged-sam.yaml --stack-name $npm_package_config_cloudFormationStackName --capabilities CAPABILITY_IAM --region $npm_package_config_region --profile $npm_package_config_profile",
+    "package-deploy": "npm run zip-code && npm run package && npm run deploy",
+    "setup": "npm install --production && (aws s3api get-bucket-location --bucket $npm_package_config_s3BucketName --region $npm_package_config_region --profile $npm_package_config_profile || npm run create-bucket) && npm run package-deploy",
+    "delete-stack": "aws cloudformation delete-stack --stack-name $npm_package_config_cloudFormationStackName --region $npm_package_config_region --profile $npm_package_config_profile",
+    "prebuild": "rimraf ./dist",
+    "build": "babel --extensions \".ts\" --source-maps --ignore src/**/*.spec.ts --ignore src/**/*.d.ts --out-dir dist src && cp src/LexProxy.d.ts dist",
+    "zip-code": "npm run build && zip -r $npm_package_config_lambdaZipFile node_modules/ dist/",
+    "lint": "./node_modules/.bin/tslint -c tslint.json 'src/**/*.ts' --fix",
+    "type-check": "tsc -p tsconfig.json",
+    "precommit": "npm run type-check && npm run lint",
+    "commit": "git-cz",
+    "report-coverage": "cat ./coverage/lcov.info | codecov",
+    "test": "jest --coverage",
+    "generate-docs": "./node_modules/.bin/typedoc --out ./docs --module modules --hideGenerator --tsconfig tdconfig.json",
+    "test:watch": "jest --coverage --watch"
+  },
+  "author": "Cristian Boarna <cristian.boarna@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crisboarna/aws-lex-proxy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/crisboarna/aws-lex-proxy/issues"
+  },
+  "homepage": "https://crisboarna.github.io/aws-lex-proxy",
+  "files": [
+    "README.md",
+    "dist/"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@babel/cli": "7.0.0-beta.32",
+    "@babel/core": "7.0.0-beta.32",
+    "@babel/plugin-proposal-class-properties": "7.0.0-beta.32",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.32",
+    "@babel/preset-env": "7.0.0-beta.32",
+    "@babel/preset-typescript": "7.0.0-beta.32",
+    "@types/jest": "22.2.3",
+    "aws-sdk": "2.224.1",
+    "codecov": "3.0.0",
+    "commitizen": "2.9.6",
+    "cz-conventional-changelog": "2.1.0",
+    "greenkeeper-lockfile": "1.14.0",
+    "husky": "0.14.3",
+    "jest": "22.4.3",
+    "marked": "0.3.19",
+    "rimraf": "2.6.2",
+    "semantic-release": "15.1.7",
+    "ts-jest": "22.4.2",
+    "tslint": "5.9.1",
+    "tslint-config-airbnb": "5.8.0",
+    "typedoc": "0.11.0",
+    "typescript": "2.8.1"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/env",
+        {
+          "targets": {
+            "node": "8.10"
+          }
+        }
+      ],
+      "@babel/typescript"
+    ],
+    "plugins": [
+      [
+        "@babel/proposal-class-properties",
+        {
+          "loose": true
+        }
+      ],
+      "@babel/proposal-object-rest-spread"
+    ]
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.ts?$": "./node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js?|ts?)$",
+    "coverageReporters": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 0,
+        "functions": 0,
+        "lines": 0,
+        "statements": 0
+      }
+    },
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/LexProxy.d.ts",
+      "<rootDir>/src/bin.lambda.ts"
+    ],
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.{js,ts}"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ]
+  }
+}
