@@ -30,6 +30,7 @@
     "precommit": "npm run type-check && npm run lint",
     "commit": "git-cz",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "test": "jest --coverage",
     "generate-docs": "./node_modules/.bin/typedoc --out ./docs --module modules --hideGenerator --tsconfig tdconfig.json",
     "test:watch": "jest --coverage --watch"
