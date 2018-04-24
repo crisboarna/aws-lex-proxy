@@ -30,10 +30,11 @@
     "precommit": "npm run test && npm run type-check && npm run lint",
     "commit": "git-cz",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "semantic-release": "semantic-release",
     "test": "jest --coverage",
     "generate-docs": "./node_modules/.bin/typedoc --out ./docs --module modules --hideGenerator --tsconfig tdconfig.json",
-    "test:watch": "jest --coverage --watch"
+    "test:watch": "jest --coverage --watch",
+    "travis-deploy-once": "travis-deploy-once"
   },
   "author": "Cristian Boarna <cristian.boarna@gmail.com>",
   "license": "MIT",
@@ -67,12 +68,13 @@
     "jest": "22.4.3",
     "marked": "0.3.19",
     "rimraf": "2.6.2",
-    "semantic-release": "15.1.7",
+    "semantic-release": "^15.1.7",
     "ts-jest": "22.4.2",
     "tslint": "5.9.1",
     "tslint-config-airbnb": "5.8.0",
     "typedoc": "0.11.0",
-    "typescript": "2.8.1"
+    "typescript": "2.8.1",
+    "travis-deploy-once": "^4.4.1"
   },
   "babel": {
     "presets": [
