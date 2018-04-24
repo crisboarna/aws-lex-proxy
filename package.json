@@ -27,7 +27,7 @@
     "zip-code": "npm run build && zip -r $npm_package_config_lambdaZipFile node_modules/ dist/",
     "lint": "./node_modules/.bin/tslint -c tslint.json 'src/**/*.ts' --fix",
     "type-check": "tsc -p tsconfig.json",
-    "precommit": "npm run type-check && npm run lint",
+    "precommit": "npm run test && npm run type-check && npm run lint",
     "commit": "git-cz",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
